@@ -43,10 +43,11 @@ int main() {
 
     // Set up the buffer for the iovec
     iov[0].iov_base = buffer;
-    iov[0].iov_len = BUFFER_SIZE;
 
     while(1)
     {
+	    iov[0].iov_len = BUFFER_SIZE;
+        
         // Clear and set up the message header structure
         memset(&msg, 0, sizeof(msg));
         msg.msg_name = &client_addr;
@@ -66,10 +67,16 @@ int main() {
         if (num_bytes < BUFFER_SIZE) {
             buffer[num_bytes] = '\0';
         }
-    
+
         // Print the received message
         printf("Received message from %s:%d\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
         printf("Message: %s\n", buffer);
+
+	    iov[0].iov_len = num_bytes;
+        num_bytes = sendmsg(sockfd, &msg, 0);
+        if (num_bytes < 0) {
+            perror("sendmsg failed");
+        }
     }
     
     // Close the socket
